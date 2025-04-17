@@ -319,7 +319,7 @@ export default function ClientDocumentationInterface() {
                   <div className="flex items-center gap-2">
                     <Textarea
                       placeholder="Ask a question about this client's documentation..."
-                      className="flex-1 rounded-md shadow-sm resize-none"
+                      className="flex-1 rounded-md shadow-sm resize-none h-10"
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyDown={handleKeyDown}
