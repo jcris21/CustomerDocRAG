@@ -1,6 +1,5 @@
 "use client"
 
-<<<<<<< HEAD
 import type React from "react"
 
 import { useState } from "react"
@@ -13,19 +12,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MessageCircle } from "lucide-react"
-import { Textarea } from "@/components/ui/textarea"
 
 export default function ClientDocumentationInterface() {
   const [message, setMessage] = useState("")
   const [selectedClient, setSelectedClient] = useState("Creative Media Group")
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("documentation")
-  const [chatMessages, setChatMessages] = useState([
-    {
-      sender: "AI Assistant",
-      text: `Hello, I'm your AI assistant. I can answer questions about Creative Media Group's documentation. How can I help you today?`,
-    },
-  ])
 
   const clients = [
     {
@@ -87,7 +79,7 @@ export default function ClientDocumentationInterface() {
 
   const handleAddNote = () => {
     if (message.trim()) {
-      setChatMessages([...chatMessages, { sender: "You", text: message }])
+      // Logic to add note would go here
       setMessage("")
     }
   }
@@ -133,13 +125,8 @@ export default function ClientDocumentationInterface() {
       .substring(0, 2)
       .toUpperCase()
   }
-=======
-import ClientDocumentationInterface from "@/components/client-documentation-interface";
->>>>>>> 237e4e288eb04ee9f25f041e71856a404227aea2
 
-export default function Home() {
   return (
-<<<<<<< HEAD
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <div className="w-80 border-r flex flex-col bg-card">
@@ -171,9 +158,7 @@ export default function Home() {
                 {filteredClients.map((client) => (
                   <div
                     key={client.id}
-                    className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors mb-1 ${
-                      selectedClient === client.company ? "bg-primary/10 text-primary" : "hover:bg-muted"
-                    }`}
+                    className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors mb-1 ${selectedClient === client.company ? "bg-primary/10 text-primary" : "hover:bg-muted"}`}
                     onClick={() => setSelectedClient(client.company)}
                   >
                     <Avatar className="bg-muted">
@@ -228,16 +213,16 @@ export default function Home() {
           <div className="border-b">
             <Tabs defaultValue="documentation" className="w-full" onValueChange={setActiveTab}>
               <div className="px-4">
-                <TabsList className="w-full max-w-md mx-auto bg-secondary/20">
-                  <TabsTrigger value="documentation" className="flex-1 data-[state=active]:bg-secondary/50 data-[state=active]:text-foreground">
+                <TabsList className="w-full max-w-md mx-auto">
+                  <TabsTrigger value="documentation" className="flex-1">
                     <MessageCircle className="h-4 w-4 mr-2" />
                     Chat Agent
                   </TabsTrigger>
-                  <TabsTrigger value="timeline" className="flex-1 data-[state=active]:bg-secondary/50 data-[state=active]:text-foreground">
+                  <TabsTrigger value="timeline" className="flex-1">
                     <Clock className="h-4 w-4 mr-2" />
                     Timeline
                   </TabsTrigger>
-                  <TabsTrigger value="profile" className="flex-1 data-[state=active]:bg-secondary/50 data-[state=active]:text-foreground">
+                  <TabsTrigger value="profile" className="flex-1">
                     <Building2 className="h-4 w-4 mr-2" />
                     Profile
                   </TabsTrigger>
@@ -260,40 +245,64 @@ export default function Home() {
 
                 <ScrollArea className="flex-1 pr-4 mb-4">
                   <div className="space-y-4">
-                    {chatMessages.map((msg, index) => (
-                      <div
-                        key={index}
-                        className={`${
-                          msg.sender === "AI Assistant" ? "bg-secondary/30" : "bg-primary text-primary-foreground"
-                        } p-3 rounded-lg ${
-                          msg.sender === "You" ? "ml-auto w-fit" : "max-w-[85%]"
-                        } `}
-                        style={{
-                          alignSelf: msg.sender === "You" ? "flex-end" : "flex-start",
-                        }}
-                      >
-                        {msg.sender === "AI Assistant" && (
-                          <>
-                            <p className="text-sm font-medium mb-1">{msg.sender}</p>
-                            <p>{msg.text}</p>
-                          </>
-                        )}
-                        {msg.sender === "You" && <p>{msg.text}</p>}
+                    <div className="bg-muted p-3 rounded-lg max-w-[85%]">
+                      <p className="text-sm font-medium mb-1">AI Assistant</p>
+                      <p>
+                        Hello, I'm your AI assistant. I can answer questions about {selectedClient}'s documentation. How
+                        can I help you today?
+                      </p>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[85%]">
+                        <p>What are the main technical requirements for the project?</p>
                       </div>
-                    ))}
+                    </div>
+
+                    <div className="bg-muted p-3 rounded-lg max-w-[85%]">
+                      <p className="text-sm font-medium mb-1">AI Assistant</p>
+                      <p>
+                        According to the client documentation, the main technical requirements for {selectedClient}'s
+                        digital marketing platform are:
+                      </p>
+                      <ul className="list-disc pl-5 mt-2 space-y-1">
+                        <li>Integration with their existing CRM systems (Salesforce)</li>
+                        <li>Capability to manage campaigns across multiple channels (email, social media, web)</li>
+                        <li>Customizable dashboard for real-time metrics analysis</li>
+                        <li>Compatibility with their current AWS infrastructure</li>
+                        <li>Compliance with GDPR regulations for European user data</li>
+                      </ul>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Sources: Technical Requirements Document (04/05/2024), Initial Meeting Minutes (03/15/2024)
+                      </p>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[85%]">
+                        <p>What is the implementation timeline?</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-muted p-3 rounded-lg max-w-[85%]">
+                      <p className="text-sm font-medium mb-1">AI Assistant</p>
+                      <p>The implementation timeline agreed with {selectedClient} is as follows:</p>
+                      <ul className="list-disc pl-5 mt-2 space-y-1">
+                        <li>Phase 1 (April-May): Initial setup and CRM integration</li>
+                        <li>Phase 2 (June-July): Dashboard development and analytics tools</li>
+                        <li>Phase 3 (August): Final testing and adjustments</li>
+                        <li>Launch: Scheduled for early September</li>
+                      </ul>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Sources: Implementation Plan (04/01/2024), Contract (03/22/2024)
+                      </p>
+                    </div>
                   </div>
                 </ScrollArea>
 
                 <div className="border-t pt-4">
                   <div className="flex items-center gap-2">
-                    <Textarea
-                      placeholder="Ask a question about this client's documentation..."
-                      className="flex-1"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                    />
-                    <Button onClick={handleAddNote}>
+                    <Input placeholder="Ask a question about this client's documentation..." className="flex-1" />
+                    <Button>
                       <MessageCircle className="h-4 w-4 mr-2" />
                       Ask
                     </Button>
@@ -400,11 +409,4 @@ export default function Home() {
       )}
     </div>
   )
-=======
-    <main>
-      <ClientDocumentationInterface />
-    </main>
-  );
->>>>>>> 237e4e288eb04ee9f25f041e71856a404227aea2
 }
-
