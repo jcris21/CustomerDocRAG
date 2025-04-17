@@ -2,21 +2,29 @@
 
 import type React from "react"
 
-import {useState} from "react"
-import {Search, Clock, User, FileText, ChevronLeft, CheckCircle, Building2, MessageCircle} from "lucide-react"
-import {Avatar, AvatarFallback} from "@/components/ui/avatar"
-import {Button} from "@/components/ui/button"
-import {Input} from "@/components/ui/input"
-import {Badge} from "@/components/ui/badge"
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
-import {ScrollArea} from "@/components/ui/scroll-area"
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
+import { useState } from "react"
+import { Search, Clock, User, FileText, ChevronLeft, CheckCircle, Building2 } from "lucide-react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { MessageCircle } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
 
 export default function ClientDocumentationInterface() {
   const [message, setMessage] = useState("")
   const [selectedClient, setSelectedClient] = useState("Creative Media Group")
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("documentation")
+  const [chatMessages, setChatMessages] = useState([
+    {
+      sender: "AI Assistant",
+      text: `Hello, I'm your AI assistant. I can answer questions about Creative Media Group's documentation. How can I help you today?`,
+    },
+  ])
 
   const clients = [
     {
@@ -56,41 +64,29 @@ export default function ClientDocumentationInterface() {
   )
 
   const clientDocuments = [
-    {id: 1, title: "Initial Proposal", date: "03/15/2024", type: "Sales", status: "Approved"},
-    {id: 2, title: "Signed Contract", date: "03/22/2024", type: "Sales", status: "Completed"},
-    {
-      id: 3,
-      title: "Implementation Plan",
-      date: "04/01/2024",
-      type: "Onboarding",
-      status: "In Progress",
-    },
-    {
-      id: 4,
-      title: "Technical Requirements",
-      date: "04/05/2024",
-      type: "Onboarding",
-      status: "Pending Review",
-    },
-    {id: 5, title: "Progress Report", date: "04/12/2024", type: "Operations", status: "New"},
+    { id: 1, title: "Initial Proposal", date: "03/15/2024", type: "Sales", status: "Approved" },
+    { id: 2, title: "Signed Contract", date: "03/22/2024", type: "Sales", status: "Completed" },
+    { id: 3, title: "Implementation Plan", date: "04/01/2024", type: "Onboarding", status: "In Progress" },
+    { id: 4, title: "Technical Requirements", date: "04/05/2024", type: "Onboarding", status: "Pending Review" },
+    { id: 5, title: "Progress Report", date: "04/12/2024", type: "Operations", status: "New" },
   ]
 
   const clientTimeline = [
-    {id: 1, date: "03/15/2024", title: "First Contact", description: "Initial meeting to discuss needs"},
-    {id: 2, date: "03/22/2024", title: "Contract Signing", description: "Approval of proposal and terms"},
-    {id: 3, date: "04/01/2024", title: "Onboarding Start", description: "Implementation team assignment"},
+    { id: 1, date: "03/15/2024", title: "First Contact", description: "Initial meeting to discuss needs" },
+    { id: 2, date: "03/22/2024", title: "Contract Signing", description: "Approval of proposal and terms" },
+    { id: 3, date: "04/01/2024", title: "Onboarding Start", description: "Implementation team assignment" },
     {
       id: 4,
       date: "04/05/2024",
       title: "Requirements Definition",
       description: "Documentation of technical specifications",
     },
-    {id: 5, date: "04/12/2024", title: "Progress Review", description: "Presentation of progress to client"},
+    { id: 5, date: "04/12/2024", title: "Progress Review", description: "Presentation of progress to client" },
   ]
 
   const handleAddNote = () => {
     if (message.trim()) {
-      // Logic to add note would go here
+      setChatMessages([...chatMessages, { sender: "You", text: message }])
       setMessage("")
     }
   }
@@ -235,7 +231,7 @@ export default function ClientDocumentationInterface() {
                     <Clock className="h-4 w-4 mr-2" />
                     Timeline
                   </TabsTrigger>
-                   <TabsTrigger value="profile" className="flex-1">
+                  <TabsTrigger value="profile" className="flex-1">
                     <Building2 className="h-4 w-4 mr-2" />
                     Profile
                   </TabsTrigger>
@@ -258,64 +254,37 @@ export default function ClientDocumentationInterface() {
 
                 <ScrollArea className="flex-1 pr-4 mb-4">
                   <div className="space-y-4">
-                    <div className="bg-muted p-3 rounded-lg max-w-[85%]">
-                      <p className="text-sm font-medium mb-1">AI Assistant</p>
-                      <p>
-                        Hello, I'm your AI assistant. I can answer questions about {selectedClient}'s documentation. How
-                        can I help you today?
-                      </p>
-                    </div>
-
-                    <div className="flex justify-end">
-                      <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[85%]">
-                        <p>What are the main technical requirements for the project?</p>
+                    {chatMessages.map((msg, index) => (
+                      <div
+                        key={index}
+                        className={`${
+                          msg.sender === "AI Assistant" ? "bg-muted" : "bg-primary text-primary-foreground flex justify-end"
+                        } p-3 rounded-lg max-w-[85%] ${
+                          msg.sender === "You" ? "ml-auto" : ""
+                        }`}
+                      >
+                        {msg.sender === "AI Assistant" && (
+                          <>
+                            <p className="text-sm font-medium mb-1">{msg.sender}</p>
+                            <p>{msg.text}</p>
+                          </>
+                        )}
+                        {msg.sender === "You" && <p>{msg.text}</p>}
                       </div>
-                    </div>
-
-                    <div className="bg-muted p-3 rounded-lg max-w-[85%]">
-                      <p className="text-sm font-medium mb-1">AI Assistant</p>
-                      <p>
-                        According to the client documentation, the main technical requirements for {selectedClient}'s
-                        digital marketing platform are:
-                      </p>
-                      <ul className="list-disc pl-5 mt-2 space-y-1">
-                        <li>Integration with their existing CRM systems (Salesforce)</li>
-                        <li>Capability to manage campaigns across multiple channels (email, social media, web)</li>
-                        <li>Customizable dashboard for real-time metrics analysis</li>
-                        <li>Compatibility with their current AWS infrastructure</li>
-                        <li>Compliance with GDPR regulations for European user data</li>
-                      </ul>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Sources: Technical Requirements Document (04/05/2024), Initial Meeting Minutes (03/15/2024)
-                      </p>
-                    </div>
-
-                    <div className="flex justify-end">
-                      <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[85%]">
-                        <p>What is the implementation timeline?</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-muted p-3 rounded-lg max-w-[85%]">
-                      <p className="text-sm font-medium mb-1">AI Assistant</p>
-                      <p>The implementation timeline agreed with {selectedClient} is as follows:</p>
-                      <ul className="list-disc pl-5 mt-2 space-y-1">
-                        <li>Phase 1 (April-May): Initial setup and CRM integration</li>
-                        <li>Phase 2 (June-July): Dashboard development and analytics tools</li>
-                        <li>Phase 3 (August): Final testing and adjustments</li>
-                        <li>Launch: Scheduled for early September</li>
-                      </ul>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Sources: Implementation Plan (04/01/2024), Contract (03/22/2024)
-                      </p>
-                    </div>
+                    ))}
                   </div>
                 </ScrollArea>
 
                 <div className="border-t pt-4">
                   <div className="flex items-center gap-2">
-                    <Input placeholder="Ask a question about this client's documentation..." className="flex-1" />
-                    <Button>
+                    <Textarea
+                      placeholder="Ask a question about this client's documentation..."
+                      className="flex-1"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                    />
+                    <Button onClick={handleAddNote}>
                       <MessageCircle className="h-4 w-4 mr-2" />
                       Ask
                     </Button>
