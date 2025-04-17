@@ -73,7 +73,7 @@ export default function Home() {
       <div className="w-1/4 p-4 border-r border-border">
         <Card className="h-full">
           <CardHeader>
-            <CardTitle className="text-primary">Customers</CardTitle>
+            <CardTitle>Customers</CardTitle>
           </CardHeader>
           <CardContent className="p-2">
             <Input type="search" placeholder="Search customers..." className="mb-2"/>
@@ -99,7 +99,7 @@ export default function Home() {
         {selectedCustomer ? (
           <Card className="h-full flex flex-col">
             <CardHeader>
-              <CardTitle className="text-primary">Chat with {selectedCustomer.name}</CardTitle>
+              <CardTitle>Chat with {selectedCustomer.name}</CardTitle>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col">
               <ScrollArea className="flex-1 mb-4">
@@ -107,7 +107,7 @@ export default function Home() {
                   {chatMessages.map((message, index) => (
                     <div
                       key={index}
-                      className={`p-2 rounded-lg mb-2 w-fit max-w-[75%] ${message.startsWith('You:') ? 'bg-primary text-white ml-auto' : 'bg-gray-200 mr-auto'}`}
+                      className={`p-2 rounded-lg mb-2 w-fit max-w-[75%] ${message.startsWith('You:') ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary-foreground text-foreground mr-auto'}`}
                     >
                       {message}
                     </div>
