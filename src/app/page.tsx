@@ -258,10 +258,13 @@ export default function ClientDocumentationInterface() {
                       <div
                         key={index}
                         className={`${
-                          msg.sender === "AI Assistant" ? "bg-muted" : "bg-primary text-primary-foreground flex justify-end"
-                        } p-3 rounded-lg max-w-[85%] ${
-                          msg.sender === "You" ? "ml-auto" : ""
-                        }`}
+                          msg.sender === "AI Assistant" ? "bg-secondary" : "bg-primary text-primary-foreground"
+                        } p-3 rounded-lg ${
+                          msg.sender === "You" ? "ml-auto w-fit" : "max-w-[85%]"
+                        } `}
+                        style={{
+                          alignSelf: msg.sender === "You" ? "flex-end" : "flex-start",
+                        }}
                       >
                         {msg.sender === "AI Assistant" && (
                           <>
