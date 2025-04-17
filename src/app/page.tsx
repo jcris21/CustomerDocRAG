@@ -1,4 +1,3 @@
-
 "use client";
 
 import {useState, useEffect} from 'react';
@@ -107,7 +106,7 @@ export default function Home() {
                   {chatMessages.map((message, index) => (
                     <div
                       key={index}
-                      className={`p-2 rounded-lg mb-2 w-fit max-w-[75%] ${message.startsWith('You:') ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary-foreground text-foreground mr-auto'}`}
+                      className={`p-2 rounded-lg mb-2 w-fit max-w-[75%] shadow-md ${message.startsWith('You:') ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-foreground mr-auto'}`}
                     >
                       {message}
                     </div>
