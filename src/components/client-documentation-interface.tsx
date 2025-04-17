@@ -2,8 +2,8 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import { Search, Clock, User, FileText, ChevronLeft, CheckCircle, Building2 } from "lucide-react"
+import { useState, useRef, useEffect } from "react"
+import { Search, Clock, User, FileText, ChevronLeft, CheckCircle, Building2, Send, MessageCircle } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,13 +11,23 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { MessageCircle } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
+import { suggestReplies } from "@/ai/flows/suggest-replies"
 
 export default function ClientDocumentationInterface() {
   const [message, setMessage] = useState("")
+  const [chatHistory, setChatHistory] = useState<
+    {
+      type: "user" | "assistant"
+      text: string
+    }[]
+  >([])
   const [selectedClient, setSelectedClient] = useState("Creative Media Group")
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("documentation")
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+  const [suggestedReplies, setSuggestedReplies] = useState<string[]>([])
 
   const clients = [
     {
@@ -77,17 +87,39 @@ export default function ClientDocumentationInterface() {
     { id: 5, date: "04/12/2024", title: "Progress Review", description: "Presentation of progress to client" },
   ]
 
-  const handleAddNote = () => {
+  const handleAsk = async () => {
     if (message.trim()) {
-      // Logic to add note would go here
+      setChatHistory((prev) => [...prev, { type: "user", text: message }])
+      const aiResponse =
+        "According to the client documentation, the main technical requirements for Creative Media Group's digital marketing platform are:\n\nIntegration with their existing CRM systems (Salesforce)\nCapability to manage campaigns across multiple channels (email, social media, web)\nCustomizable dashboard for real-time metrics analysis\nCompatibility with their current AWS infrastructure\nCompliance with GDPR regulations for European user data"
+      setChatHistory((prev) => [...prev, { type: "assistant", text: aiResponse }])
       setMessage("")
+
+      // Generate suggested replies
+      try {
+        const replies = await suggestReplies({
+          chatContext: message,
+          customerHistory: "Client has been onboarded, signed contract on 03/22/2024",
+        })
+        setSuggestedReplies(replies.suggestedReplies)
+      } catch (error) {
+        console.error("Error generating suggested replies:", error)
+        setSuggestedReplies(["Tell me more about the CRM integration", "What about GDPR compliance?", "How long will the implementation take?"])
+      }
     }
   }
+
+  useEffect(() => {
+    // Scroll to the bottom of the chat container when messages are added or updated
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    }
+  }, [chatHistory])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      handleAddNote()
+      handleAsk()
     }
   }
 
@@ -126,6 +158,12 @@ export default function ClientDocumentationInterface() {
       .toUpperCase()
   }
 
+  const handleSuggestedReplyClick = (reply: string) => {
+    setChatHistory((prev) => [...prev, { type: "user", text: reply }])
+    const aiResponse = "OK. Here are the details."
+    setChatHistory((prev) => [...prev, { type: "assistant", text: aiResponse }])
+  }
+
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
@@ -136,7 +174,7 @@ export default function ClientDocumentationInterface() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search companies..."
-              className="pl-8"
+              className="pl-8 rounded-md shadow-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -146,7 +184,7 @@ export default function ClientDocumentationInterface() {
         <Tabs defaultValue="all" className="w-full">
           <div className="px-4 pt-2">
             <TabsList className="w-full">
-              <TabsTrigger value="all" className="w-full">
+              <TabsTrigger value="all" className="w-full rounded-md">
                 Clients
               </TabsTrigger>
             </TabsList>
@@ -158,7 +196,12 @@ export default function ClientDocumentationInterface() {
                 {filteredClients.map((client) => (
                   <div
                     key={client.id}
-                    className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors mb-1 ${selectedClient === client.company ? "bg-primary/10 text-primary" : "hover:bg-muted"}`}
+                    className={cn(
+                      `flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors mb-1`,
+                      selectedClient === client.company
+                        ? "bg-primary/10 text-primary"
+                        : "hover:bg-muted"
+                    )}
                     onClick={() => setSelectedClient(client.company)}
                   >
                     <Avatar className="bg-muted">
@@ -214,15 +257,15 @@ export default function ClientDocumentationInterface() {
             <Tabs defaultValue="documentation" className="w-full" onValueChange={setActiveTab}>
               <div className="px-4">
                 <TabsList className="w-full max-w-md mx-auto">
-                  <TabsTrigger value="documentation" className="flex-1">
+                  <TabsTrigger value="documentation" className="flex-1 rounded-md">
                     <MessageCircle className="h-4 w-4 mr-2" />
                     Chat Agent
                   </TabsTrigger>
-                  <TabsTrigger value="timeline" className="flex-1">
+                  <TabsTrigger value="timeline" className="flex-1 rounded-md">
                     <Clock className="h-4 w-4 mr-2" />
                     Timeline
                   </TabsTrigger>
-                  <TabsTrigger value="profile" className="flex-1">
+                  <TabsTrigger value="profile" className="flex-1 rounded-md">
                     <Building2 className="h-4 w-4 mr-2" />
                     Profile
                   </TabsTrigger>
@@ -232,78 +275,57 @@ export default function ClientDocumentationInterface() {
           </div>
 
           {/* Tab Content */}
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1 flex flex-col">
             {activeTab === "documentation" && (
-              <div className="p-6 flex flex-col h-full">
-                <div className="flex justify-between items-center mb-4">
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between p-4">
                   <h3 className="text-lg font-medium">AI Assistant - Client Documentation</h3>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="rounded-md">
                     <FileText className="h-4 w-4 mr-2" />
                     View Original Documents
                   </Button>
                 </div>
 
-                <ScrollArea className="flex-1 pr-4 mb-4">
-                  <div className="space-y-4">
-                    <div className="bg-muted p-3 rounded-lg max-w-[85%]">
-                      <p className="text-sm font-medium mb-1">AI Assistant</p>
-                      <p>
-                        Hello, I'm your AI assistant. I can answer questions about {selectedClient}'s documentation. How
-                        can I help you today?
-                      </p>
+                <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto space-y-4">
+                  {chatHistory.map((message, index) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        "p-3 rounded-md w-fit max-w-[85%]",
+                        message.type === "assistant"
+                          ? "bg-secondary text-secondary-foreground"
+                          : "bg-primary text-primary-foreground ml-auto"
+                      )}
+                    >
+                      <p>{message.text}</p>
                     </div>
+                  ))}
+                </div>
 
-                    <div className="flex justify-end">
-                      <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[85%]">
-                        <p>What are the main technical requirements for the project?</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-muted p-3 rounded-lg max-w-[85%]">
-                      <p className="text-sm font-medium mb-1">AI Assistant</p>
-                      <p>
-                        According to the client documentation, the main technical requirements for {selectedClient}'s
-                        digital marketing platform are:
-                      </p>
-                      <ul className="list-disc pl-5 mt-2 space-y-1">
-                        <li>Integration with their existing CRM systems (Salesforce)</li>
-                        <li>Capability to manage campaigns across multiple channels (email, social media, web)</li>
-                        <li>Customizable dashboard for real-time metrics analysis</li>
-                        <li>Compatibility with their current AWS infrastructure</li>
-                        <li>Compliance with GDPR regulations for European user data</li>
-                      </ul>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Sources: Technical Requirements Document (04/05/2024), Initial Meeting Minutes (03/15/2024)
-                      </p>
-                    </div>
-
-                    <div className="flex justify-end">
-                      <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[85%]">
-                        <p>What is the implementation timeline?</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-muted p-3 rounded-lg max-w-[85%]">
-                      <p className="text-sm font-medium mb-1">AI Assistant</p>
-                      <p>The implementation timeline agreed with {selectedClient} is as follows:</p>
-                      <ul className="list-disc pl-5 mt-2 space-y-1">
-                        <li>Phase 1 (April-May): Initial setup and CRM integration</li>
-                        <li>Phase 2 (June-July): Dashboard development and analytics tools</li>
-                        <li>Phase 3 (August): Final testing and adjustments</li>
-                        <li>Launch: Scheduled for early September</li>
-                      </ul>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Sources: Implementation Plan (04/01/2024), Contract (03/22/2024)
-                      </p>
-                    </div>
+                <div className="p-4 border-t">
+                  <div className="mb-2 flex space-x-2 overflow-x-auto">
+                    {suggestedReplies.map((reply, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        size="sm"
+                        className="whitespace-nowrap rounded-md"
+                        onClick={() => handleSuggestedReplyClick(reply)}
+                      >
+                        {reply}
+                      </Button>
+                    ))}
                   </div>
-                </ScrollArea>
-
-                <div className="border-t pt-4">
                   <div className="flex items-center gap-2">
-                    <Input placeholder="Ask a question about this client's documentation..." className="flex-1" />
-                    <Button>
-                      <MessageCircle className="h-4 w-4 mr-2" />
+                    <Textarea
+                      placeholder="Ask a question about this client's documentation..."
+                      className="flex-1 rounded-md shadow-sm resize-none"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                    />
+                    <Button onClick={handleAsk} className="rounded-md">
+                      <Send className="h-4 w-4 mr-2" />
                       Ask
                     </Button>
                   </div>
@@ -331,7 +353,7 @@ export default function ClientDocumentationInterface() {
               <div className="p-6">
                 <h3 className="text-lg font-medium mb-6">Client Profile</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card>
+                  <Card className="rounded-md shadow-sm">
                     <CardHeader>
                       <CardTitle>General Information</CardTitle>
                     </CardHeader>
@@ -361,7 +383,7 @@ export default function ClientDocumentationInterface() {
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="rounded-md shadow-sm">
                     <CardHeader>
                       <CardTitle>Project Details</CardTitle>
                     </CardHeader>

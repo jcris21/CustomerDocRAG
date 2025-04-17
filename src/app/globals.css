@@ -19,7 +19,7 @@ body {
     --primary-foreground: 0 0% 100%;      /* White */
     --secondary: 0 0% 81%;              /* Light Gray */
     --secondary-foreground: 300 50% 10%; /* Dark Purple */
-    --muted: 0 0% 70%;                  /* Light Gray */
+    --muted: 0 0% 90%;                  /* Lighter Gray */
     --muted-foreground: 280 5% 50%;     /* Grayish Purple */
     --accent: 180 100% 25%;             /* Teal */
     --accent-foreground: 0 0% 100%;       /* White */
@@ -54,7 +54,7 @@ body {
     --primary-foreground: 0 0% 100%;      /* White */
     --secondary: 300 40% 20%;           /* Darker Purple */
     --secondary-foreground: 240 5% 97%; /* Light Gray */
-    --muted: 300 30% 30%;               /* Darker Gray */
+    --muted: 0 0% 20%;               /* Darker Gray */
     --muted-foreground: 280 5% 50%;     /* Grayish Purple */
     --accent: 180 100% 25%;             /* Teal */
     --accent-foreground: 0 0% 100%;       /* White */
