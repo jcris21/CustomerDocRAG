@@ -222,16 +222,16 @@ export default function ClientDocumentationInterface() {
           <div className="border-b">
             <Tabs defaultValue="documentation" className="w-full" onValueChange={setActiveTab}>
               <div className="px-4">
-                <TabsList className="w-full max-w-md mx-auto">
-                  <TabsTrigger value="documentation" className="flex-1">
+                <TabsList className="w-full max-w-md mx-auto bg-secondary/20">
+                  <TabsTrigger value="documentation" className="flex-1 data-[state=active]:bg-secondary/50 data-[state=active]:text-foreground">
                     <MessageCircle className="h-4 w-4 mr-2" />
                     Chat Agent
                   </TabsTrigger>
-                  <TabsTrigger value="timeline" className="flex-1">
+                  <TabsTrigger value="timeline" className="flex-1 data-[state=active]:bg-secondary/50 data-[state=active]:text-foreground">
                     <Clock className="h-4 w-4 mr-2" />
                     Timeline
                   </TabsTrigger>
-                  <TabsTrigger value="profile" className="flex-1">
+                  <TabsTrigger value="profile" className="flex-1 data-[state=active]:bg-secondary/50 data-[state=active]:text-foreground">
                     <Building2 className="h-4 w-4 mr-2" />
                     Profile
                   </TabsTrigger>
@@ -258,7 +258,7 @@ export default function ClientDocumentationInterface() {
                       <div
                         key={index}
                         className={`${
-                          msg.sender === "AI Assistant" ? "bg-secondary" : "bg-primary text-primary-foreground"
+                          msg.sender === "AI Assistant" ? "bg-secondary/30" : "bg-primary text-primary-foreground"
                         } p-3 rounded-lg ${
                           msg.sender === "You" ? "ml-auto w-fit" : "max-w-[85%]"
                         } `}
@@ -395,3 +395,4 @@ export default function ClientDocumentationInterface() {
     </div>
   )
 }
+
