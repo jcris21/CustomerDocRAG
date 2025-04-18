@@ -97,7 +97,7 @@ export default function ClientDocumentationInterface() {
       const webhookUrl = process.env.NEXT_PUBLIC_WEBHOOK_URL;
       if (webhookUrl) {
         try {
-          await fetch(webhookUrl, {
+          const response = await fetch(webhookUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -108,6 +108,15 @@ export default function ClientDocumentationInterface() {
             }),
           });
           console.log('Webhook data sent successfully');
+          const data = await response.json();
+          if (data && Array.isArray(data) && data.length > 0 && data[0].output) {
+            const aiResponse = data[0].output;
+            setChatHistory((prev) => [...prev, { type: "assistant", text: aiResponse }]);
+          } else {
+            console.warn('Unexpected webhook response format:', data);
+            setChatHistory((prev) => [...prev, { type: "assistant", text: 'No output returned from webhook' }]);
+          }
+
         } catch (error) {
           console.error('Error sending data to webhook:', error);
           // Optionally, add error handling or user notification here
@@ -117,14 +126,14 @@ export default function ClientDocumentationInterface() {
       }
 
       // Simulate AI response (replace with actual AI call if needed)
-      const aiResponse = `According to the client documentation, the main technical requirements for Creative Media Group's digital marketing platform are:
+      // const aiResponse = `According to the client documentation, the main technical requirements for Creative Media Group's digital marketing platform are:
 
-Integration with their existing CRM systems (Salesforce)
-Capability to manage campaigns across multiple channels (email, social media, web)
-Customizable dashboard for real-time metrics analysis
-Compatibility with their current AWS infrastructure
-Compliance with GDPR regulations for European user data`
-      setChatHistory((prev) => [...prev, { type: "assistant", text: aiResponse }])
+// Integration with their existing CRM systems (Salesforce)
+// Capability to manage campaigns across multiple channels (email, social media, web)
+// Customizable dashboard for real-time metrics analysis
+// Compatibility with their current AWS infrastructure
+// Compliance with GDPR regulations for European user data`
+      // setChatHistory((prev) => [...prev, { type: "assistant", text: aiResponse }])
 
       // Generate suggested replies
       try {
