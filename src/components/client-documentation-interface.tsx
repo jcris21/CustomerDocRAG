@@ -89,16 +89,47 @@ export default function ClientDocumentationInterface() {
 
   const handleAsk = async () => {
     if (message.trim()) {
-      setChatHistory((prev) => [...prev, { type: "user", text: message }])
-      const aiResponse =
-        "According to the client documentation, the main technical requirements for Creative Media Group's digital marketing platform are:\n\nIntegration with their existing CRM systems (Salesforce)\nCapability to manage campaigns across multiple channels (email, social media, web)\nCustomizable dashboard for real-time metrics analysis\nCompatibility with their current AWS infrastructure\nCompliance with GDPR regulations for European user data"
+      const userMessage = message;
+      setChatHistory((prev) => [...prev, { type: "user", text: userMessage }])
+      setMessage("") // Clear input immediately
+
+      // Send data to webhook
+      const webhookUrl = process.env.NEXT_PUBLIC_WEBHOOK_URL;
+      if (webhookUrl) {
+        try {
+          await fetch(webhookUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              query: userMessage,
+              clientName: selectedClient,
+            }),
+          });
+          console.log('Webhook data sent successfully');
+        } catch (error) {
+          console.error('Error sending data to webhook:', error);
+          // Optionally, add error handling or user notification here
+        }
+      } else {
+        console.warn('NEXT_PUBLIC_WEBHOOK_URL is not defined in environment variables.');
+      }
+
+      // Simulate AI response (replace with actual AI call if needed)
+      const aiResponse = `According to the client documentation, the main technical requirements for Creative Media Group's digital marketing platform are:
+
+Integration with their existing CRM systems (Salesforce)
+Capability to manage campaigns across multiple channels (email, social media, web)
+Customizable dashboard for real-time metrics analysis
+Compatibility with their current AWS infrastructure
+Compliance with GDPR regulations for European user data`
       setChatHistory((prev) => [...prev, { type: "assistant", text: aiResponse }])
-      setMessage("")
 
       // Generate suggested replies
       try {
         const replies = await suggestReplies({
-          chatContext: message,
+          chatContext: userMessage, // Use the sent message for context
           customerHistory: "Client has been onboarded, signed contract on 03/22/2024",
         })
         setSuggestedReplies(replies.suggestedReplies)
@@ -319,7 +350,7 @@ export default function ClientDocumentationInterface() {
                   <div className="flex items-center gap-2">
                     <Textarea
                       placeholder="Ask a question about this client's documentation..."
-                      className="flex-1 rounded-md shadow-sm resize-none h-10"
+                      className="flex-1 rounded-md shadow-sm resize-none h-9 py-1.5" // Re-applied the py-1.5 based on previous step
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyDown={handleKeyDown}
