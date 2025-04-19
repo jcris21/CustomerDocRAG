@@ -15,6 +15,29 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { suggestReplies } from "@/ai/flows/suggest-replies"
 
+// ChatContainer.tsx
+import '@n8n/chat/style.css';
+import { createChat } from '@n8n/chat';
+
+export const ChatWidget = () => {
+  useEffect(() => {
+    createChat({
+      webhookUrl: 'https://x6fvvfce.rpcld.co/webhook/a4a36e6a-aa85-4c6b-bb98-da4b8e4cd33e/chat',
+      mode: 'fullscreen',
+      chatInputKey: 'chatInput', // Mapea con AI Agent node
+      chatSessionKey: 'sessionId', // Para memoria contextual
+      initialMessages: ['Hola, soy tu Copilot. ¿En qué puedo ayudarte hoy?'],
+      target: '#chat-container',
+      webhookConfig: {
+        headers: {
+          'Authorization': ''
+        }
+      }
+    });
+  }, []);
+
+  return <div id="chat-container" style={{ height: '100%', width: '100%' }} />;
+};
 export default function ClientDocumentationInterface() {
   const [message, setMessage] = useState("")
   const [chatHistory, setChatHistory] = useState<
@@ -326,20 +349,8 @@ export default function ClientDocumentationInterface() {
                   </Button>
                 </div>
 
-                <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto space-y-4">
-                  {chatHistory.map((message, index) => (
-                    <div
-                      key={index}
-                      className={cn(
-                        "p-3 rounded-md w-fit max-w-[85%]",
-                        message.type === "assistant"
-                          ? "bg-secondary text-secondary-foreground"
-                          : "bg-primary text-primary-foreground ml-auto"
-                      )}
-                    >
-                      <p>{message.text}</p>
-                    </div>
-                  ))}
+                <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto space-y-4 h-full">
+                  <ChatWidget/>
                 </div>
 
                 <div className="p-4 border-t">
