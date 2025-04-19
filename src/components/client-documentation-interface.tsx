@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Search, Clock, User, FileText, ChevronLeft, CheckCircle, Building2, Send, MessageCircle } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { suggestReplies } from "@/ai/flows/suggest-replies"
 
-export default function ClientDocumentationInterface() {  const [message, setMessage] = useState("")
+export default function ClientDocumentationInterface() {
+  const [message, setMessage] = useState("")
   const [chatHistory, setChatHistory] = useState<
     {
       type: "user" | "assistant"
@@ -24,8 +25,8 @@ export default function ClientDocumentationInterface() {  const [message, setMes
   >([])
   const [selectedClient, setSelectedClient] = useState("Creative Media Group")
   const [searchQuery, setSearchQuery] = useState("")
-  const [activeTab, setActiveTab] = useState<"documentation" | "timeline" | "profile">("documentation")
-  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState("documentation")
+  const chatContainerRef = useRef<HTMLDivElement>(null)
   const [suggestedReplies, setSuggestedReplies] = useState<string[]>([])
 
   const clients = [
@@ -108,9 +109,8 @@ export default function ClientDocumentationInterface() {  const [message, setMes
           });
           console.log('Webhook data sent successfully');
           const data = await response.json();
-          console.log('Webhook response data:', data);
-          if (data && data.output) {
-            const aiResponse = data.output;
+          if (data && Array.isArray(data) && data.length > 0 && data[0].output) {
+            const aiResponse = data[0].output;
             setChatHistory((prev) => [...prev, { type: "assistant", text: aiResponse }]);
           } else {
             console.warn('Unexpected webhook response format:', data);
@@ -191,7 +191,7 @@ export default function ClientDocumentationInterface() {  const [message, setMes
   // Function to get company initials
   const getCompanyInitials = (company: string) => {
     return company
-      .split(/s+/)
+      .split(/\s+/)
       .map((word) => word[0])
       .join("")
       .substring(0, 2)
@@ -202,7 +202,7 @@ export default function ClientDocumentationInterface() {  const [message, setMes
     setChatHistory((prev) => [...prev, { type: "user", text: reply }])
     const aiResponse = "OK. Here are the details."
     setChatHistory((prev) => [...prev, { type: "assistant", text: aiResponse }])
-  };
+  }
 
   return (
     <div className="flex h-screen bg-background">
@@ -265,278 +265,200 @@ export default function ClientDocumentationInterface() {  const [message, setMes
         </Tabs>
       </div>
 
-      {/* Client Documentation Area */}      
-      <div className="flex-1 flex flex-col">
-        {/* Client Header */}
-        <div className="flex items-center p-4 border-b">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <Avatar className="h-10 w-10 bg-primary/10">
-              <AvatarFallback className="text-primary font-medium">
-                {getCompanyInitials(selectedClient)}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-semibold">{selectedClient}</h2>
-                {getStatusBadge("Onboarding")}
+      {/* Client Documentation Area */}
+      {selectedClient ? (
+        <div className="flex-1 flex flex-col">
+          {/* Client Header */}
+          <div className="flex items-center p-4 border-b">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              <Avatar className="h-10 w-10 bg-primary/10">
+                <AvatarFallback className="text-primary font-medium">
+                  {getCompanyInitials(selectedClient)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="font-semibold">{selectedClient}</h2>
+                  {getStatusBadge("Onboarding")}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  <User className="h-3 w-3 inline mr-1" />
+                  Jane Smith (Marketing Director)
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                <User className="h-3 w-3 inline mr-1" />
-                Jane Smith (Marketing Director)
-              </p>
             </div>
           </div>
-        </div>
 
-        {/* Client Tabs */}
-        <div className="border-b">
-          <Tabs defaultValue="documentation" className="w-full" onValueChange={setActiveTab}>
-            <div className="px-4">
-              <TabsList className="w-full max-w-md mx-auto">
-                <TabsTrigger value="documentation" className="flex-1 rounded-md">
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  Chat Agent
-                </TabsTrigger>
-                <TabsTrigger value="timeline" className="flex-1 rounded-md">
-                  <Clock className="h-4 w-4 mr-2" />
-                  Timeline
-                </TabsTrigger>
-                <TabsTrigger value="profile" className="flex-1 rounded-md">
-                  <Building2 className="h-4 w-4 mr-2" />
-                  Profile
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            {/* Tab Content */}
-            <TabsContent value="documentation" className="flex-1 p-4">
-              {selectedClient ? (
-                <div ref={chatContainerRef} id="n8n-chat-container">
-                  <link
-                    href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css"
-                    rel="stylesheet"
-                  />
-                  <script type="module">
-                    {`import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
-
-                    createChat({
-                      webhookUrl: 'https://x6fvvfce.rpcld.co/webhook/a4a36e6a-aa85-4c6b-bb98-da4b8e4cd33e/chat',
-                    });`}
-                  </script>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <p className="text-muted-foreground">Select a client to view documentation.</p>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="timeline" className="p-6">
-              {selectedClient ? (
-                <>
-                  <h3 className="text-lg font-medium mb-6">Client Timeline</h3>
-                  <div className="relative border-l border-muted pl-6 ml-4">
-                    {clientTimeline.map((event, index) => (
-                      <div key={event.id} className={`mb-8 ${index === 0 ? "pt-2" : ""}`}>
-                        <div className="absolute -left-2 mt-1.5 h-4 w-4 rounded-full border border-background bg-muted"></div>
-                        <time className="mb-1 text-sm font-normal leading-none text-muted-foreground">{event.date}</time>
-                        <h3 className="text-base font-semibold">{event.title}</h3>
-                        <p className="text-sm text-muted-foreground">{event.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <p className="text-muted-foreground">Select a client to view the timeline.</p>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="profile" className="p-6">
-              {selectedClient ? (
-                <>
-                  <h3 className="text-lg font-medium mb-6">Client Profile</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <Card className="rounded-md shadow-sm">
-                        <CardHeader>
-                          <CardTitle>General Information</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <dl className="space-y-4">
-                            <div>
-                              <dt className="text-sm font-medium text-muted-foreground">Company</dt>
-                              <dd className="mt-1">{selectedClient}</dd>
-                            </div>
-                            <div>
-                              <dt className="text-sm font-medium text-muted-foreground">Industry</dt>
-                              <dd className="mt-1">Marketing and Advertising</dd>
-                            </div>
-                            <div>
-                              <dt className="text-sm font-medium text-muted-foreground">Primary Contact</dt>
-                              <dd className="mt-1">Jane Smith (Marketing Director)</dd>
-                            </div>
-                            <div>
-                              <dt className="text-sm font-medium text-muted-foreground">Email</dt>
-                              <dd className="mt-1">jane.smith@creativemedia.com</dd>
-                            </div>
-                            <div>
-                              <dt className="text-sm font-medium text-muted-foreground">Phone</dt>
-                              <dd className="mt-1">+1 (555) 123-4567</dd>
-                            </div>
-                          </dl>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="rounded-md shadow-sm">
-                        <CardHeader>
-                          <CardTitle>Project Details</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <dl className="space-y-4">
-                            <div>
-                              <dt className="text-sm font-medium text-muted-foreground">Solution Type</dt>
-                              <dd className="mt-1">Digital Marketing Platform</dd>
-                            </div>
-                            <div>
-                              <dt className="text-sm font-medium text-muted-foreground">Start Date</dt>
-                              <dd className="mt-1">March 15, 2024</dd>
-                            </div>
-                            <div>
-                              <dt className="text-sm font-medium text-muted-foreground">Current Phase</dt>
-                              <dd className="mt-1">Onboarding</dd>
-                            </div>
-                            <div>
-                              <dt className="text-sm font-medium text-muted-foreground">Project Manager</dt>
-                              <dd className="mt-1">Carlos Rodriguez</dd>
-                            </div>
-                            <div>
-                              <dt className="text-sm font-medium text-muted-foreground">Status</dt>
-                              <dd className="mt-1 flex items-center">
-                                <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
-                                In Progress
-                              </dd>
-                            </div>
-                          </dl>
-                        </CardContent>
-                      </Card>
-                    </div>
-                </>
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <p className="text-muted-foreground">Select a client to view the profile.</p>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        </div>
-      
-    </div>
-  )
-}
+          {/* Client Tabs */}
+          <div className="border-b">
+            <Tabs defaultValue="documentation" className="w-full" onValueChange={setActiveTab}>
+              <div className="px-4">
+                <TabsList className="w-full max-w-md mx-auto">
+                  <TabsTrigger value="documentation" className="flex-1 rounded-md">
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Chat Agent
+                  </TabsTrigger>
+                  <TabsTrigger value="timeline" className="flex-1 rounded-md">
+                    <Clock className="h-4 w-4 mr-2" />
+                    Timeline
+                  </TabsTrigger>
+                  <TabsTrigger value="profile" className="flex-1 rounded-md">
+                    <Building2 className="h-4 w-4 mr-2" />
+                    Profile
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+            </Tabs>
           </div>
 
           {/* Tab Content */}
-          <TabsContent value="documentation" className="flex-1 p-4">
-            <div ref={chatContainerRef} id="n8n-chat-container">
-              <link
-                href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css"
-                rel="stylesheet"
-              />
-              <script type="module">
-                {`import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
-
-                createChat({
-                  webhookUrl: 'https://x6fvvfce.rpcld.co/webhook/a4a36e6a-aa85-4c6b-bb98-da4b8e4cd33e/chat',
-                });`}
-              </script>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="timeline" className="p-6">
-            <h3 className="text-lg font-medium mb-6">Client Timeline</h3>
-            <div className="relative border-l border-muted pl-6 ml-4">
-              {clientTimeline.map((event, index) => (
-                <div key={event.id} className={`mb-8 ${index === 0 ? "pt-2" : ""}`}>
-                  <div className="absolute -left-2 mt-1.5 h-4 w-4 rounded-full border border-background bg-muted"></div>
-                  <time className="mb-1 text-sm font-normal leading-none text-muted-foreground">{event.date}</time>
-                  <h3 className="text-base font-semibold">{event.title}</h3>
-                  <p className="text-sm text-muted-foreground">{event.description}</p>
+          <div className="flex-1 flex flex-col">
+            {activeTab === "documentation" && (
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between p-4">
+                  <h3 className="text-lg font-medium">AI Assistant - Client Documentation</h3>
+                  <Button variant="outline" size="sm" className="rounded-md">
+                    <FileText className="h-4 w-4 mr-2" />
+                    View Original Documents
+                  </Button>
                 </div>
-              ))}
-            </div>
-          </TabsContent>
 
-          <TabsContent value="profile" className="p-6">
-            <h3 className="text-lg font-medium mb-6">Client Profile</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="rounded-md shadow-sm">
-                  <CardHeader>
-                    <CardTitle>General Information</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <dl className="space-y-4">
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground">Company</dt>
-                        <dd className="mt-1">{selectedClient}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground">Industry</dt>
-                        <dd className="mt-1">Marketing and Advertising</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground">Primary Contact</dt>
-                        <dd className="mt-1">Jane Smith (Marketing Director)</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground">Email</dt>
-                        <dd className="mt-1">jane.smith@creativemedia.com</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground">Phone</dt>
-                        <dd className="mt-1">+1 (555) 123-4567</dd>
-                      </div>
-                    </dl>
-                  </CardContent>
-                </Card>
+                <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto space-y-4">
+                  {chatHistory.map((message, index) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        "p-3 rounded-md w-fit max-w-[85%]",
+                        message.type === "assistant"
+                          ? "bg-secondary text-secondary-foreground"
+                          : "bg-primary text-primary-foreground ml-auto"
+                      )}
+                    >
+                      <p>{message.text}</p>
+                    </div>
+                  ))}
+                </div>
 
-                <Card className="rounded-md shadow-sm">
-                  <CardHeader>
-                    <CardTitle>Project Details</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <dl className="space-y-4">
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground">Solution Type</dt>
-                        <dd className="mt-1">Digital Marketing Platform</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground">Start Date</dt>
-                        <dd className="mt-1">March 15, 2024</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground">Current Phase</dt>
-                        <dd className="mt-1">Onboarding</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground">Project Manager</dt>
-                        <dd className="mt-1">Carlos Rodriguez</dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm font-medium text-muted-foreground">Status</dt>
-                        <dd className="mt-1 flex items-center">
-                          <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
-                          In Progress
-                        </dd>
-                      </div>
-                    </dl>
-                  </CardContent>
-                </Card>
+                <div className="p-4 border-t">
+                  <div className="mb-2 flex space-x-2 overflow-x-auto">
+                    {suggestedReplies.map((reply, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        size="sm"
+                        className="whitespace-nowrap rounded-md"
+                        onClick={() => handleSuggestedReplyClick(reply)}
+                      >
+                        {reply}
+                      </Button>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Textarea
+                      placeholder="Ask a question about this client's documentation..."
+                      className="flex-1 rounded-md shadow-sm resize-none h-9 py-1.5" // Re-applied the py-1.5 based on previous step
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                    />
+                    <Button onClick={handleAsk} className="rounded-md">
+                      <Send className="h-4 w-4 mr-2" />
+                      Ask
+                    </Button>
+                  </div>
+                </div>
               </div>
-          </TabsContent>
+            )}
+
+            {activeTab === "timeline" && (
+              <div className="p-6">
+                <h3 className="text-lg font-medium mb-6">Client Timeline</h3>
+                <div className="relative border-l border-muted pl-6 ml-4">
+                  {clientTimeline.map((event, index) => (
+                    <div key={event.id} className={`mb-8 ${index === 0 ? "pt-2" : ""}`}>
+                      <div className="absolute -left-2 mt-1.5 h-4 w-4 rounded-full border border-background bg-muted"></div>
+                      <time className="mb-1 text-sm font-normal leading-none text-muted-foreground">{event.date}</time>
+                      <h3 className="text-base font-semibold">{event.title}</h3>
+                      <p className="text-sm text-muted-foreground">{event.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === "profile" && (
+              <div className="p-6">
+                <h3 className="text-lg font-medium mb-6">Client Profile</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card className="rounded-md shadow-sm">
+                    <CardHeader>
+                      <CardTitle>General Information</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <dl className="space-y-4">
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">Company</dt>
+                          <dd className="mt-1">{selectedClient}</dd>
+                        </div>
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">Industry</dt>
+                          <dd className="mt-1">Marketing and Advertising</dd>
+                        </div>
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">Primary Contact</dt>
+                          <dd className="mt-1">Jane Smith (Marketing Director)</dd>
+                        </div>
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">Email</dt>
+                          <dd className="mt-1">jane.smith@creativemedia.com</dd>
+                        </div>
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">Phone</dt>
+                          <dd className="mt-1">+1 (555) 123-4567</dd>
+                        </div>
+                      </dl>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="rounded-md shadow-sm">
+                    <CardHeader>
+                      <CardTitle>Project Details</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <dl className="space-y-4">
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">Solution Type</dt>
+                          <dd className="mt-1">Digital Marketing Platform</dd>
+                        </div>
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">Start Date</dt>
+                          <dd className="mt-1">March 15, 2024</dd>
+                        </div>
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">Current Phase</dt>
+                          <dd className="mt-1">Onboarding</dd>
+                        </div>
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">Project Manager</dt>
+                          <dd className="mt-1">Carlos Rodriguez</dd>
+                        </div>
+                        <div>
+                          <dt className="text-sm font-medium text-muted-foreground">Status</dt>
+                          <dd className="mt-1 flex items-center">
+                            <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
+                            In Progress
+                          </dd>
+                        </div>
+                      </dl>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <div className="flex-1 flex items-center justify-center">
